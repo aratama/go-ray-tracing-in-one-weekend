@@ -1,9 +1,11 @@
 package raytracing
 
 import (
+	"fmt"
 	"image"
 	"image/png"
 	"os"
+	"time"
 )
 
 const aspectRatio = 16.0 / 9.0
@@ -46,6 +48,8 @@ func Render() {
 
 	img := image.NewRGBA(image.Rect(0, 0, imageWidth, imageHeight))
 
+	start := time.Now()
+
 	for j := 0; j < imageHeight; j++ {
 		for i := 0; i < imageWidth; i++ {
 			u := float64(i) / (imageWidth - 1)
@@ -56,6 +60,10 @@ func Render() {
 		}
 	}
 
+	fmt.Printf("rendering time: %s\n", time.Now().Sub(start).String())
+
+	encodeStart := time.Now()
+
 	out, err := os.Create("out.png")
 	if err != nil {
 		panic(err)
@@ -65,5 +73,7 @@ func Render() {
 	if err != nil {
 		panic(err)
 	}
+
+	fmt.Printf("encodeing time: %s\n", time.Now().Sub(encodeStart).String())
 
 }
