@@ -33,7 +33,7 @@ func negate(v Vec3) Vec3 {
 	return Vec3{x: -v.x, y: -v.y, z: -v.z}
 }
 
-func mul(v Vec3, t float64) Vec3 {
+func mul(t float64, v Vec3) Vec3 {
 	return Vec3{x: v.x * t, y: v.y * t, z: v.z * t}
 }
 
@@ -78,11 +78,11 @@ func hadamard(u Vec3, v Vec3) Vec3 {
 }
 
 func unit(v Vec3) Vec3 {
-	return mul(v, 1/length(v))
+	return mul(1/length(v), v)
 }
 
 func lerp(u Vec3, v Vec3, t float64) Vec3 {
-	return add(mul(u, 1-t), mul(v, t))
+	return add(mul(1-t, u), mul(t, v))
 }
 
 func randomVec3(random *rand.Rand) Vec3 {
@@ -98,5 +98,5 @@ func randomVec3MinMax(min float64, max float64, random *rand.Rand) Vec3 {
 }
 
 func reflect(v Vec3, n Vec3) Vec3 {
-	return sub(v, mul(n, 2.0*dot(v, n)))
+	return sub(v, mul(2.0*dot(v, n), n))
 }

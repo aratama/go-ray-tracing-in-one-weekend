@@ -43,7 +43,7 @@ func rayColor(ray Ray, world Hittable, depth int, random *rand.Rand) Color {
 		}
 
 		target := add(add(rec.p, rec.normal), randomUnitVector(random))
-		return mul(rayColor(Ray{origin: rec.p, direction: sub(target, rec.p)}, world, depth-1, random), 0.5)
+		return mul(0.5, rayColor(Ray{origin: rec.p, direction: sub(target, rec.p)}, world, depth-1, random))
 	}
 	unitDirection := unit(ray.direction)
 	t := 0.5 * (unitDirection.y + 1.0)
@@ -79,10 +79,10 @@ func Render() {
 	ch := make(chan Pixel, imageWidth*imageHeight)
 
 	world := HittableList{hittables: []Hittable{
-		&Sphere{center: vec3(0, 0, -1), radius: 0.5, material: &Lambertian{albedo: vec3(0.7, 0.3, 0.3)}},
+		&Sphere{center: vec3(0, 0, -1), radius: 0.5, material: &Lambertian{albedo: vec3(0.1, 0.2, 0.5)}},
 		&Sphere{center: vec3(0, -100.5, -1), radius: 100, material: &Lambertian{albedo: vec3(0.8, 0.8, 0.0)}},
-		&Sphere{center: vec3(1, 0, -1), radius: 0.5, material: &Metal{albedo: vec3(0.8, 0.6, 0.2), fuzz: 1.0}},
-		&Sphere{center: vec3(-1, 0, -1), radius: 0.5, material: &Metal{albedo: vec3(0.8, 0.8, 0.8), fuzz: 0.0}},
+		&Sphere{center: vec3(1, 0, -1), radius: 0.5, material: &Metal{albedo: vec3(0.8, 0.6, 0.2), fuzz: 0.0}},
+		&Sphere{center: vec3(-1, 0, -1), radius: 0.5, material: &Dielectric{refIdx: 1.5}},
 	}}
 
 	var waitGroup sync.WaitGroup

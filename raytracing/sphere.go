@@ -23,7 +23,7 @@ func (sphere *Sphere) hit(ray Ray, tMin float64, tMax float64, rec *HitRecord) b
 		if temp < tMax && temp > tMin {
 			rec.t = temp
 			rec.p = ray.at(rec.t)
-			outwardNormal := mul(sub(rec.p, sphere.center), 1/sphere.radius)
+			outwardNormal := mul(1/sphere.radius, sub(rec.p, sphere.center))
 			rec.setFaceNormal(&ray, &outwardNormal)
 			rec.material = sphere.material
 			return true
@@ -32,7 +32,7 @@ func (sphere *Sphere) hit(ray Ray, tMin float64, tMax float64, rec *HitRecord) b
 		if temp < tMax && temp > tMin {
 			rec.t = temp
 			rec.p = ray.at(rec.t)
-			outwardNormal := mul(sub(rec.p, sphere.center), 1/sphere.radius)
+			outwardNormal := mul(1/sphere.radius, sub(rec.p, sphere.center))
 			rec.setFaceNormal(&ray, &outwardNormal)
 			rec.material = sphere.material
 			return true
