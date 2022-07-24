@@ -19,11 +19,12 @@ func (lambertian *Lambertian) scatter(rIn *Ray, rec *HitRecord, attenuation *Col
 
 type Metal struct {
 	albedo Color
+	fuzz   float64
 }
 
 func (metal *Metal) scatter(rIn *Ray, rec *HitRecord, attenuation *Color, scattered *Ray, random *rand.Rand) bool {
 	reflected := reflect(unit(rIn.direction), rec.normal)
-	*scattered = Ray{origin: rec.p, direction: reflected}
+	*scattered = Ray{origin: rec.p, direction: add(reflected, mul(randomInUnitSphere(random), metal.fuzz))}
 	*attenuation = metal.albedo
 	return (dot(scattered.direction, rec.normal) > 0)
 }

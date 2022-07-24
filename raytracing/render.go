@@ -81,8 +81,8 @@ func Render() {
 	world := HittableList{hittables: []Hittable{
 		&Sphere{center: vec3(0, 0, -1), radius: 0.5, material: &Lambertian{albedo: vec3(0.7, 0.3, 0.3)}},
 		&Sphere{center: vec3(0, -100.5, -1), radius: 100, material: &Lambertian{albedo: vec3(0.8, 0.8, 0.0)}},
-		&Sphere{center: vec3(1, 0, -1), radius: 0.5, material: &Metal{albedo: vec3(0.8, 0.6, 0.2)}},
-		&Sphere{center: vec3(-1, 0, -1), radius: 0.5, material: &Metal{albedo: vec3(0.8, 0.8, 0.8)}},
+		&Sphere{center: vec3(1, 0, -1), radius: 0.5, material: &Metal{albedo: vec3(0.8, 0.6, 0.2), fuzz: 1.0}},
+		&Sphere{center: vec3(-1, 0, -1), radius: 0.5, material: &Metal{albedo: vec3(0.8, 0.8, 0.8), fuzz: 0.0}},
 	}}
 
 	var waitGroup sync.WaitGroup
