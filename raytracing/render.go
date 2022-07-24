@@ -18,15 +18,6 @@ const aspectRatio = 16.0 / 9.0
 const imageWidth = 384
 const imageHeight = imageWidth / aspectRatio
 
-const viewportHeight = 2.0
-const viewportWidth = aspectRatio * viewportHeight
-const focalLength = 1
-
-var origin = vec3(0, 0, 0)
-var horizontal = vec3(viewportWidth, 0, 0)
-var vertical = vec3(0, viewportHeight, 0)
-var lowerLeftCorner = sub(sub((origin.sub(horizontal.mul(0.5))), vertical.mul(0.5)), vec3(0, 0, focalLength))
-
 func rayColor(ray Ray, world Hittable, depth int, random *rand.Rand) Color {
 	rec := HitRecord{}
 
@@ -58,7 +49,9 @@ type Pixel struct {
 
 func pathTrace(world HittableList, i int, j int, ch chan Pixel, waitGroup *sync.WaitGroup) {
 	defer waitGroup.Done()
-	cam := camera()
+
+	cam := camera(vec3(-2, 2, 1), vec3(0, 0, -1), vec3(0, 1, 0), 20, aspectRatio)
+
 	var pixelColor Vec3
 	random := rand.New(rand.NewSource(0))
 	for s := 0; s < samplesPerPixel; s++ {
@@ -78,12 +71,17 @@ func Render() {
 
 	ch := make(chan Pixel, imageWidth*imageHeight)
 
+	// r := math.Cos(math.Pi / 4.0)
+
 	world := HittableList{hittables: []Hittable{
 		&Sphere{center: vec3(0, 0, -1), radius: 0.5, material: &Lambertian{albedo: vec3(0.1, 0.2, 0.5)}},
 		&Sphere{center: vec3(0, -100.5, -1), radius: 100, material: &Lambertian{albedo: vec3(0.8, 0.8, 0.0)}},
 		&Sphere{center: vec3(1, 0, -1), radius: 0.5, material: &Metal{albedo: vec3(0.8, 0.6, 0.2), fuzz: 0.3}},
 		&Sphere{center: vec3(-1, 0, -1), radius: 0.5, material: &Dielectric{refIdx: 1.5}},
 		&Sphere{center: vec3(-1, 0, -1), radius: -0.45, material: &Dielectric{refIdx: 1.5}},
+
+		// &Sphere{center: vec3(-r, 0, -1), radius: r, material: &Lambertian{albedo: vec3(0, 0, 1)}},
+		// &Sphere{center: vec3(+r, 0, -1), radius: r, material: &Lambertian{albedo: vec3(1, 0, 0)}},
 	}}
 
 	var waitGroup sync.WaitGroup
