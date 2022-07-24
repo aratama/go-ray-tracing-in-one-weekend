@@ -3,8 +3,9 @@ package raytracing
 import "math"
 
 type Sphere struct {
-	center Vec3
-	radius float64
+	center   Vec3
+	radius   float64
+	material Material
 }
 
 func (sphere *Sphere) hit(ray Ray, tMin float64, tMax float64, rec *HitRecord) bool {
@@ -21,6 +22,7 @@ func (sphere *Sphere) hit(ray Ray, tMin float64, tMax float64, rec *HitRecord) b
 			rec.p = ray.at(rec.t)
 			outwardNormal := mul(sub(rec.p, sphere.center), 1/sphere.radius)
 			rec.setFaceNormal(&ray, &outwardNormal)
+			rec.material = sphere.material
 			return true
 		}
 		temp = (-halfB + root) / a
@@ -29,6 +31,7 @@ func (sphere *Sphere) hit(ray Ray, tMin float64, tMax float64, rec *HitRecord) b
 			rec.p = ray.at(rec.t)
 			outwardNormal := mul(sub(rec.p, sphere.center), 1/sphere.radius)
 			rec.setFaceNormal(&ray, &outwardNormal)
+			rec.material = sphere.material
 			return true
 		}
 	}

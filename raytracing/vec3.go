@@ -61,11 +61,19 @@ func dot(v Vec3, t Vec3) float64 {
 	return v.x*t.x + v.y*t.y + v.z*t.z
 }
 
-func cross(u *Vec3, v *Vec3) Vec3 {
+func cross(u Vec3, v Vec3) Vec3 {
 	return Vec3{
 		x: u.y*v.z - u.z*v.y,
 		y: u.z*v.x - u.x*v.z,
 		z: u.x*v.y - u.y*v.x,
+	}
+}
+
+func hadamard(u Vec3, v Vec3) Vec3 {
+	return Vec3{
+		x: u.x * v.x,
+		y: u.y * v.y,
+		z: u.z * v.z,
 	}
 }
 
@@ -83,4 +91,8 @@ func randomVec3() Vec3 {
 
 func randomVec3MinMax(min float64, max float64) Vec3 {
 	return vec3(random(min, max), random(min, max), random(min, max))
+}
+
+func reflect(v Vec3, n Vec3) Vec3 {
+	return sub(v, mul(n, 2.0*dot(v, n)))
 }

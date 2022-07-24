@@ -28,12 +28,20 @@ var vertical = vec3(0, viewportHeight, 0)
 var lowerLeftCorner = sub(sub((origin.sub(horizontal.mul(0.5))), vertical.mul(0.5)), vec3(0, 0, focalLength))
 
 func rayColor(ray Ray, world Hittable, depth int) Color {
+	rec := HitRecord{}
+
 	if depth <= 0 {
 		return vec3(0, 0, 0)
 	}
 
-	rec := HitRecord{}
 	if world.hit(ray, 0.001, math.Inf(1), &rec) {
+
+		var scattered Ray
+		var attenuation Color
+		if rec.material.scatter(&ray, &rec, &attenuation, &scattered) {
+			return hadamard(attenuation, rayColor(scattered, world, depth-1))
+		}
+
 		target := add(add(rec.p, rec.normal), randomUnitVector())
 		return mul(rayColor(Ray{origin: rec.p, direction: sub(target, rec.p)}, world, depth-1), 0.5)
 	}
@@ -52,6 +60,7 @@ func pathTrace(world HittableList, i int, j int, ch chan Pixel, waitGroup *sync.
 	defer waitGroup.Done()
 	cam := camera()
 	var pixelColor Vec3
+	rand.Seed(0)
 	for s := 0; s < samplesPerPixel; s++ {
 		u := (float64(i) + rand.Float64()) / (imageWidth - 1)
 		v := (float64(j) + rand.Float64()) / (imageHeight - 1)
@@ -70,8 +79,10 @@ func Render() {
 	ch := make(chan Pixel, imageWidth*imageHeight)
 
 	world := HittableList{hittables: []Hittable{
-		&Sphere{center: vec3(0, 0, -1), radius: 0.5},
-		&Sphere{center: vec3(0, -100.5, -1), radius: 100},
+		&Sphere{center: vec3(0, 0, -1), radius: 0.5, material: &Lambertian{albedo: vec3(0.7, 0.3, 0.3)}},
+		&Sphere{center: vec3(0, -100.5, -1), radius: 100, material: &Lambertian{albedo: vec3(0.8, 0.8, 0.0)}},
+		&Sphere{center: vec3(1, 0, -1), radius: 0.5, material: &Metal{albedo: vec3(0.8, 0.6, 0.2)}},
+		&Sphere{center: vec3(-1, 0, -1), radius: 0.5, material: &Metal{albedo: vec3(0.8, 0.8, 0.8)}},
 	}}
 
 	var waitGroup sync.WaitGroup
