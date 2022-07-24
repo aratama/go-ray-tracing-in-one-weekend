@@ -27,16 +27,17 @@ func lerp(u Vec3, v Vec3, t float64) Vec3 {
 	return add(mul(u, 1-t), mul(v, t))
 }
 
-func rayColor(ray Ray) Color {
-	t := hitSphere(vec3(0, 0, -1), 0.5, ray)
-	if t > 0.0 {
-		n := unit(sub(ray.At(t), vec3(0, 0, -1)))
-		return mul(vec3(n.x+1, n.y+1, n.z+1), 0.5)
-	} else {
-		unitDirection := unit(ray.direction)
-		t := 0.5 * (unitDirection.y + 1.0)
-		return lerp(vec3(1, 1, 1), vec3(0.5, 0.7, 1.0), t)
+func rayColor(ray Ray, world Hittable) Color {
+
+	rec := HitRecord{}
+
+	if world.hit(ray, 0, math.Inf(1), &rec) {
+		return mul(add(rec.normal, vec3(1, 1, 1)), 0.5)
 	}
+
+	unitDirection := unit(ray.direction)
+	t := 0.5 * (unitDirection.y + 1.0)
+	return lerp(vec3(1, 1, 1), vec3(0.5, 0.7, 1.0), t)
 }
 
 func hitSphere(center Point, radius float64, ray Ray) float64 {
@@ -58,13 +59,13 @@ type Pixel struct {
 	color Color
 }
 
-func pathTrace(i int, j int, ch chan Pixel, waitGroup *sync.WaitGroup) {
+func pathTrace(world HittableList, i int, j int, ch chan Pixel, waitGroup *sync.WaitGroup) {
 	defer waitGroup.Done()
 	u := float64(i) / (imageWidth - 1)
 	v := float64(j) / (imageHeight - 1)
 	direction := sub(add(add(lowerLeftCorner, horizontal.mul(u)), vertical.mul(v)), origin)
 	r := Ray{origin: origin, direction: direction}
-	ch <- Pixel{x: i, y: j, color: rayColor(r)}
+	ch <- Pixel{x: i, y: j, color: rayColor(r, &world)}
 }
 
 func Render() {
@@ -75,12 +76,17 @@ func Render() {
 
 	ch := make(chan Pixel, imageWidth*imageHeight)
 
+	world := HittableList{hittables: []Hittable{
+		&Sphere{center: vec3(0, 0, -1), radius: 0.5},
+		&Sphere{center: vec3(0, -100.5, -1), radius: 100},
+	}}
+
 	var waitGroup sync.WaitGroup
 
 	for j := 0; j < imageHeight; j++ {
 		for i := 0; i < imageWidth; i++ {
 			waitGroup.Add(1)
-			go pathTrace(i, j, ch, &waitGroup)
+			go pathTrace(world, i, j, ch, &waitGroup)
 		}
 	}
 
