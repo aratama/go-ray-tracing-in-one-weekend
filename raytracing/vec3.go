@@ -16,11 +16,11 @@ func vec3(x float64, y float64, z float64) Vec3 {
 	return Vec3{x: x, y: y, z: z}
 }
 
-func addVec3(v Vec3, t Vec3) Vec3 {
+func add(v Vec3, t Vec3) Vec3 {
 	return Vec3{x: v.x + t.x, y: v.y + t.y, z: v.z + t.z}
 }
 
-func subVec3(v Vec3, t Vec3) Vec3 {
+func sub(v Vec3, t Vec3) Vec3 {
 	return Vec3{x: v.x - t.x, y: v.y - t.y, z: v.z - t.z}
 }
 
@@ -28,11 +28,11 @@ func (v *Vec3) sub(t Vec3) Vec3 {
 	return Vec3{x: v.x - t.x, y: v.y - t.y, z: v.z - t.z}
 }
 
-func negateVec3(v Vec3) Vec3 {
+func negate(v Vec3) Vec3 {
 	return Vec3{x: -v.x, y: -v.y, z: -v.z}
 }
 
-func mulVec3(v Vec3, t float64) Vec3 {
+func mul(v Vec3, t float64) Vec3 {
 	return Vec3{x: v.x * t, y: v.y * t, z: v.z * t}
 }
 
@@ -40,11 +40,19 @@ func (v *Vec3) mul(t float64) Vec3 {
 	return Vec3{x: v.x * t, y: v.y * t, z: v.z * t}
 }
 
-func lenVec3(v Vec3) float64 {
-	return math.Sqrt(lenSquaredVec3(v))
+func length(v Vec3) float64 {
+	return math.Sqrt(lengthSquared(v))
 }
 
-func lenSquaredVec3(v Vec3) float64 {
+func (v *Vec3) length() float64 {
+	return math.Sqrt(v.lengthSquared())
+}
+
+func lengthSquared(v Vec3) float64 {
+	return v.x*v.x + v.y*v.y + v.z*v.z
+}
+
+func (v *Vec3) lengthSquared() float64 {
 	return v.x*v.x + v.y*v.y + v.z*v.z
 }
 
@@ -61,5 +69,5 @@ func cross(u *Vec3, v *Vec3) Vec3 {
 }
 
 func unit(v Vec3) Vec3 {
-	return mulVec3(v, 1/lenVec3(v))
+	return mul(v, 1/length(v))
 }

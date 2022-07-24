@@ -18,15 +18,20 @@ const viewportHeight = 2.0
 const viewportWidth = aspectRatio * viewportHeight
 const focalLength = 1
 
+var origin = vec3(0, 0, 0)
+var horizontal = vec3(viewportWidth, 0, 0)
+var vertical = vec3(0, viewportHeight, 0)
+var lowerLeftCorner = sub(sub((origin.sub(horizontal.mul(0.5))), vertical.mul(0.5)), vec3(0, 0, focalLength))
+
 func lerp(u Vec3, v Vec3, t float64) Vec3 {
-	return addVec3(mulVec3(u, 1-t), mulVec3(v, t))
+	return add(mul(u, 1-t), mul(v, t))
 }
 
 func rayColor(ray Ray) Color {
 	t := hitSphere(vec3(0, 0, -1), 0.5, ray)
 	if t > 0.0 {
-		n := unit(subVec3(ray.At(t), vec3(0, 0, -1)))
-		return mulVec3(vec3(n.x+1, n.y+1, n.z+1), 0.5)
+		n := unit(sub(ray.At(t), vec3(0, 0, -1)))
+		return mul(vec3(n.x+1, n.y+1, n.z+1), 0.5)
 	} else {
 		unitDirection := unit(ray.direction)
 		t := 0.5 * (unitDirection.y + 1.0)
@@ -35,15 +40,15 @@ func rayColor(ray Ray) Color {
 }
 
 func hitSphere(center Point, radius float64, ray Ray) float64 {
-	oc := subVec3(ray.origin, center)
-	a := dot(ray.direction, ray.direction)
-	b := 2.0 * dot(oc, ray.direction)
-	c := dot(oc, oc) - radius*radius
-	discriminant := b*b - 4*a*c
+	oc := sub(ray.origin, center)
+	a := ray.direction.lengthSquared()
+	halfB := dot(oc, ray.direction)
+	c := oc.lengthSquared() - radius*radius
+	discriminant := halfB*halfB - a*c
 	if discriminant < 0 {
 		return -1
 	} else {
-		return (-b - math.Sqrt(discriminant)) / (2.0 * a)
+		return (-halfB - math.Sqrt(discriminant)) / a
 	}
 }
 
@@ -55,17 +60,10 @@ type Pixel struct {
 
 func pathTrace(i int, j int, ch chan Pixel, waitGroup *sync.WaitGroup) {
 	defer waitGroup.Done()
-
-	var origin = vec3(0, 0, 0)
-	var horizontal = vec3(viewportWidth, 0, 0)
-	var vertical = vec3(0, viewportHeight, 0)
-	var lowerLeftCorner = subVec3(subVec3((origin.sub(horizontal.mul(0.5))), vertical.mul(0.5)), vec3(0, 0, focalLength))
-
 	u := float64(i) / (imageWidth - 1)
 	v := float64(j) / (imageHeight - 1)
-	direction := subVec3(addVec3(addVec3(lowerLeftCorner, horizontal.mul(u)), vertical.mul(v)), origin)
+	direction := sub(add(add(lowerLeftCorner, horizontal.mul(u)), vertical.mul(v)), origin)
 	r := Ray{origin: origin, direction: direction}
-
 	ch <- Pixel{x: i, y: j, color: rayColor(r)}
 }
 

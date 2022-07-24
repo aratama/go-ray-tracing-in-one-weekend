@@ -6,9 +6,9 @@ type Ray struct {
 }
 
 func At(ray *Ray, t float64) Point {
-	return addVec3(ray.origin, mulVec3(ray.direction, t))
+	return add(ray.origin, mul(ray.direction, t))
 }
 
 func (ray *Ray) At(t float64) Point {
-	return addVec3(ray.origin, mulVec3(ray.direction, t))
+	return add(ray.origin, mul(ray.direction, t))
 }
