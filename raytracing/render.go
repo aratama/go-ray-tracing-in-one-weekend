@@ -50,14 +50,18 @@ type Pixel struct {
 func pathTrace(world HittableList, i int, j int, ch chan Pixel, waitGroup *sync.WaitGroup) {
 	defer waitGroup.Done()
 
-	cam := camera(vec3(-2, 2, 1), vec3(0, 0, -1), vec3(0, 1, 0), 20, aspectRatio)
+	lookfrom := vec3(-2, 2, 1)
+	lookat := vec3(0, 0, -1)
+	dist_to_focus := length(sub(lookfrom, lookat))
+	aperture := 0.05
+	cam := camera(lookfrom, lookat, vec3(0, 1, 0), 20, aspectRatio, aperture, dist_to_focus)
 
 	var pixelColor Vec3
 	random := rand.New(rand.NewSource(0))
 	for s := 0; s < samplesPerPixel; s++ {
 		u := (float64(i) + random.Float64()) / (imageWidth - 1)
 		v := (float64(j) + random.Float64()) / (imageHeight - 1)
-		pixelColor = add(pixelColor, rayColor(cam.getRay(u, v), &world, 50, random))
+		pixelColor = add(pixelColor, rayColor(cam.getRay(u, v, random), &world, 50, random))
 	}
 
 	ch <- Pixel{x: i, y: j, color: pixelColor}

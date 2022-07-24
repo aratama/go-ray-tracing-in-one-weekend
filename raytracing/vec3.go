@@ -100,3 +100,13 @@ func randomVec3MinMax(min float64, max float64, random *rand.Rand) Vec3 {
 func reflect(v Vec3, n Vec3) Vec3 {
 	return sub(v, mul(2.0*dot(v, n), n))
 }
+
+func randomInUnitDisk(random *rand.Rand) Vec3 {
+	for {
+		p := vec3(randomMinMax(-1, 1, random), randomMinMax(-1, 1, random), 0)
+		if p.lengthSquared() >= 1 {
+			continue
+		}
+		return p
+	}
+}
