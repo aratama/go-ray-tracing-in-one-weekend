@@ -61,8 +61,21 @@ func (dielectric *Dielectric) scatter(rIn *Ray, rec *HitRecord, attenuation *Col
 		return true
 	}
 
+	reflect_prob := schlick(cosTheta, etaiOverEtat)
+	if random.Float64() < reflect_prob {
+		reflected := reflect(unitDirection, rec.normal)
+		*scattered = Ray{origin: rec.p, direction: reflected}
+		return true
+	}
+
 	refracted := refract(unitDirection, rec.normal, etaiOverEtat)
 	*scattered = Ray{origin: rec.p, direction: refracted}
 	return true
 
+}
+
+func schlick(cosine float64, refIdx float64) float64 {
+	r0 := (1 - refIdx) / (1 + refIdx)
+	r0 = r0 * r0
+	return r0 + (1-r0)*math.Pow((1-cosine), 5)
 }
