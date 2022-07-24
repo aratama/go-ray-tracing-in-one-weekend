@@ -1,6 +1,8 @@
 package raytracing
 
-import "image/color"
+import (
+	"image/color"
+)
 
 type Color = Vec3
 

@@ -15,7 +15,7 @@ const samplesPerPixel = 100
 const maxDepth = 50
 
 const aspectRatio = 16.0 / 9.0
-const imageWidth = 384
+const imageWidth = 1280
 const imageHeight = imageWidth / aspectRatio
 
 func rayColor(ray Ray, world Hittable, depth int, random *rand.Rand) Color {
@@ -50,10 +50,10 @@ type Pixel struct {
 func pathTrace(world HittableList, i int, j int, ch chan Pixel, waitGroup *sync.WaitGroup) {
 	defer waitGroup.Done()
 
-	lookfrom := vec3(-2, 2, 1)
-	lookat := vec3(0, 0, -1)
-	dist_to_focus := length(sub(lookfrom, lookat))
-	aperture := 0.05
+	lookfrom := vec3(13, 2, 3)
+	lookat := vec3(0, 0, 0)
+	dist_to_focus := 10.0
+	aperture := 0.00
 	cam := camera(lookfrom, lookat, vec3(0, 1, 0), 20, aspectRatio, aperture, dist_to_focus)
 
 	var pixelColor Vec3
@@ -77,16 +77,19 @@ func Render() {
 
 	// r := math.Cos(math.Pi / 4.0)
 
-	world := HittableList{hittables: []Hittable{
-		&Sphere{center: vec3(0, 0, -1), radius: 0.5, material: &Lambertian{albedo: vec3(0.1, 0.2, 0.5)}},
-		&Sphere{center: vec3(0, -100.5, -1), radius: 100, material: &Lambertian{albedo: vec3(0.8, 0.8, 0.0)}},
-		&Sphere{center: vec3(1, 0, -1), radius: 0.5, material: &Metal{albedo: vec3(0.8, 0.6, 0.2), fuzz: 0.3}},
-		&Sphere{center: vec3(-1, 0, -1), radius: 0.5, material: &Dielectric{refIdx: 1.5}},
-		&Sphere{center: vec3(-1, 0, -1), radius: -0.45, material: &Dielectric{refIdx: 1.5}},
+	// world := HittableList{hittables: []Hittable{
+	// 	&Sphere{center: vec3(0, 0, -1), radius: 0.5, material: &Lambertian{albedo: vec3(0.1, 0.2, 0.5)}},
+	// 	&Sphere{center: vec3(0, -100.5, -1), radius: 100, material: &Lambertian{albedo: vec3(0.8, 0.8, 0.0)}},
+	// 	&Sphere{center: vec3(1, 0, -1), radius: 0.5, material: &Metal{albedo: vec3(0.8, 0.6, 0.2), fuzz: 0.3}},
+	// 	&Sphere{center: vec3(-1, 0, -1), radius: 0.5, material: &Dielectric{refIdx: 1.5}},
+	// 	&Sphere{center: vec3(-1, 0, -1), radius: -0.45, material: &Dielectric{refIdx: 1.5}},
 
-		// &Sphere{center: vec3(-r, 0, -1), radius: r, material: &Lambertian{albedo: vec3(0, 0, 1)}},
-		// &Sphere{center: vec3(+r, 0, -1), radius: r, material: &Lambertian{albedo: vec3(1, 0, 0)}},
-	}}
+	// 	// &Sphere{center: vec3(-r, 0, -1), radius: r, material: &Lambertian{albedo: vec3(0, 0, 1)}},
+	// 	// &Sphere{center: vec3(+r, 0, -1), radius: r, material: &Lambertian{albedo: vec3(1, 0, 0)}},
+	// }}
+
+	random := rand.New(rand.NewSource(0))
+	world := random_scene(random)
 
 	var waitGroup sync.WaitGroup
 
