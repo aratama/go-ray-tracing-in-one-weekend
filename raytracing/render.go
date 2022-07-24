@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image"
 	"image/png"
+	"math"
 	"os"
 	"sync"
 	"time"
@@ -22,8 +23,10 @@ func lerp(u Vec3, v Vec3, t float64) Vec3 {
 }
 
 func rayColor(ray Ray) Color {
-	if hitSPhoere(vec3(0, 0, -1), 0.5, ray) {
-		return vec3(1, 0, 0)
+	t := hitSphere(vec3(0, 0, -1), 0.5, ray)
+	if t > 0.0 {
+		n := unit(subVec3(ray.At(t), vec3(0, 0, -1)))
+		return mulVec3(vec3(n.x+1, n.y+1, n.z+1), 0.5)
 	} else {
 		unitDirection := unit(ray.direction)
 		t := 0.5 * (unitDirection.y + 1.0)
@@ -31,13 +34,17 @@ func rayColor(ray Ray) Color {
 	}
 }
 
-func hitSPhoere(center Point, radius float64, ray Ray) bool {
+func hitSphere(center Point, radius float64, ray Ray) float64 {
 	oc := subVec3(ray.origin, center)
 	a := dot(ray.direction, ray.direction)
 	b := 2.0 * dot(oc, ray.direction)
 	c := dot(oc, oc) - radius*radius
 	discriminant := b*b - 4*a*c
-	return discriminant > 0
+	if discriminant < 0 {
+		return -1
+	} else {
+		return (-b - math.Sqrt(discriminant)) / (2.0 * a)
+	}
 }
 
 type Pixel struct {
@@ -46,7 +53,7 @@ type Pixel struct {
 	color Color
 }
 
-func PathTrace(i int, j int, ch chan Pixel, waitGroup *sync.WaitGroup) {
+func pathTrace(i int, j int, ch chan Pixel, waitGroup *sync.WaitGroup) {
 	defer waitGroup.Done()
 
 	var origin = vec3(0, 0, 0)
@@ -75,7 +82,7 @@ func Render() {
 	for j := 0; j < imageHeight; j++ {
 		for i := 0; i < imageWidth; i++ {
 			waitGroup.Add(1)
-			go PathTrace(i, j, ch, &waitGroup)
+			go pathTrace(i, j, ch, &waitGroup)
 		}
 	}
 
