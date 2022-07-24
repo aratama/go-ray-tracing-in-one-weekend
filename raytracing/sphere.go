@@ -45,3 +45,10 @@ func randomInUnitSphere() Vec3 {
 		return p
 	}
 }
+
+func randomUnitVector() Vec3 {
+	a := random(0, 2.0*math.Pi)
+	z := random(-1, 1)
+	r := math.Sqrt(1.0 - z*z)
+	return vec3(r*math.Cos(a), r*math.Sin(a), z)
+}

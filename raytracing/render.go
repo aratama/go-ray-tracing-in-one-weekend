@@ -34,7 +34,7 @@ func rayColor(ray Ray, world Hittable, depth int) Color {
 
 	rec := HitRecord{}
 	if world.hit(ray, 0.001, math.Inf(1), &rec) {
-		target := add(add(rec.p, rec.normal), randomInUnitSphere())
+		target := add(add(rec.p, rec.normal), randomUnitVector())
 		return mul(rayColor(Ray{origin: rec.p, direction: sub(target, rec.p)}, world, depth-1), 0.5)
 	}
 	unitDirection := unit(ray.direction)
