@@ -5,12 +5,13 @@ import (
 	"image"
 	"image/png"
 	"math"
+	"math/rand"
 	"os"
 	"sync"
 	"time"
 )
 
-const samplesPerPixel = 1
+const samplesPerPixel = 100
 
 const aspectRatio = 16.0 / 9.0
 const imageWidth = 384
@@ -44,9 +45,14 @@ type Pixel struct {
 func pathTrace(world HittableList, i int, j int, ch chan Pixel, waitGroup *sync.WaitGroup) {
 	defer waitGroup.Done()
 	cam := camera()
-	u := float64(i) / (imageWidth - 1)
-	v := float64(j) / (imageHeight - 1)
-	ch <- Pixel{x: i, y: j, color: rayColor(cam.getRay(u, v), &world)}
+	var pixelColor Vec3
+	for s := 0; s < samplesPerPixel; s++ {
+		u := (float64(i) + rand.Float64()) / (imageWidth - 1)
+		v := (float64(j) + rand.Float64()) / (imageHeight - 1)
+		pixelColor = add(pixelColor, rayColor(cam.getRay(u, v), &world))
+	}
+
+	ch <- Pixel{x: i, y: j, color: pixelColor}
 }
 
 func Render() {
