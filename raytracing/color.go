@@ -2,6 +2,8 @@ package raytracing
 
 import "image/color"
 
+type Color = Vec3
+
 func Vec3ToColor(r float64, g float64, b float64, a float64) color.RGBA {
 	ir := uint8(255.999 * r)
 	ig := uint8(255.999 * g)

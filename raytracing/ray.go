@@ -5,10 +5,10 @@ type Ray struct {
 	direction Vec3
 }
 
-func At(ray *Ray, t float64) Point {
+func at(ray *Ray, t float64) Point {
 	return add(ray.origin, mul(ray.direction, t))
 }
 
-func (ray *Ray) At(t float64) Point {
+func (ray *Ray) at(t float64) Point {
 	return add(ray.origin, mul(ray.direction, t))
 }

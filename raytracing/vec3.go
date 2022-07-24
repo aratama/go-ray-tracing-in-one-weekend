@@ -10,8 +10,6 @@ type Vec3 struct {
 
 type Point = Vec3
 
-type Color = Vec3
-
 func vec3(x float64, y float64, z float64) Vec3 {
 	return Vec3{x: x, y: y, z: z}
 }
@@ -70,4 +68,8 @@ func cross(u *Vec3, v *Vec3) Vec3 {
 
 func unit(v Vec3) Vec3 {
 	return mul(v, 1/length(v))
+}
+
+func lerp(u Vec3, v Vec3, t float64) Vec3 {
+	return add(mul(u, 1-t), mul(v, t))
 }

@@ -23,34 +23,14 @@ var horizontal = vec3(viewportWidth, 0, 0)
 var vertical = vec3(0, viewportHeight, 0)
 var lowerLeftCorner = sub(sub((origin.sub(horizontal.mul(0.5))), vertical.mul(0.5)), vec3(0, 0, focalLength))
 
-func lerp(u Vec3, v Vec3, t float64) Vec3 {
-	return add(mul(u, 1-t), mul(v, t))
-}
-
 func rayColor(ray Ray, world Hittable) Color {
-
 	rec := HitRecord{}
-
 	if world.hit(ray, 0, math.Inf(1), &rec) {
 		return mul(add(rec.normal, vec3(1, 1, 1)), 0.5)
 	}
-
 	unitDirection := unit(ray.direction)
 	t := 0.5 * (unitDirection.y + 1.0)
 	return lerp(vec3(1, 1, 1), vec3(0.5, 0.7, 1.0), t)
-}
-
-func hitSphere(center Point, radius float64, ray Ray) float64 {
-	oc := sub(ray.origin, center)
-	a := ray.direction.lengthSquared()
-	halfB := dot(oc, ray.direction)
-	c := oc.lengthSquared() - radius*radius
-	discriminant := halfB*halfB - a*c
-	if discriminant < 0 {
-		return -1
-	} else {
-		return (-halfB - math.Sqrt(discriminant)) / a
-	}
 }
 
 type Pixel struct {
