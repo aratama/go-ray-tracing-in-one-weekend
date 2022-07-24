@@ -10,6 +10,8 @@ import (
 	"time"
 )
 
+const samplesPerPixel = 1
+
 const aspectRatio = 16.0 / 9.0
 const imageWidth = 384
 const imageHeight = imageWidth / aspectRatio
@@ -41,11 +43,10 @@ type Pixel struct {
 
 func pathTrace(world HittableList, i int, j int, ch chan Pixel, waitGroup *sync.WaitGroup) {
 	defer waitGroup.Done()
+	cam := camera()
 	u := float64(i) / (imageWidth - 1)
 	v := float64(j) / (imageHeight - 1)
-	direction := sub(add(add(lowerLeftCorner, horizontal.mul(u)), vertical.mul(v)), origin)
-	r := Ray{origin: origin, direction: direction}
-	ch <- Pixel{x: i, y: j, color: rayColor(r, &world)}
+	ch <- Pixel{x: i, y: j, color: rayColor(cam.getRay(u, v), &world)}
 }
 
 func Render() {
@@ -75,7 +76,12 @@ func Render() {
 	for j := 0; j < imageHeight; j++ {
 		for i := 0; i < imageWidth; i++ {
 			px := <-ch
-			img.SetRGBA(px.x, imageHeight-1-px.y, VecToColor(px.color))
+
+			scale := 1.0 / float64(samplesPerPixel)
+			px.color.x *= scale
+			px.color.y *= scale
+			px.color.z *= scale
+			img.SetRGBA(px.x, imageHeight-1-px.y, vecColorToRGBA(px.color))
 		}
 	}
 

@@ -4,14 +4,14 @@ import "image/color"
 
 type Color = Vec3
 
-func Vec3ToColor(r float64, g float64, b float64, a float64) color.RGBA {
-	ir := uint8(255.999 * r)
-	ig := uint8(255.999 * g)
-	ib := uint8(255.999 * b)
-	ia := uint8(255.999 * a)
+func vecColorToRGBA(v Vec3) color.RGBA {
+	r := v.x
+	g := v.y
+	b := v.z
+	a := 1.0
+	ir := uint8(255.999 * clamp(r, 0.0, 0.999))
+	ig := uint8(255.999 * clamp(g, 0.0, 0.999))
+	ib := uint8(255.999 * clamp(b, 0.0, 0.999))
+	ia := uint8(255.999 * clamp(a, 0.0, 0.999))
 	return color.RGBA{R: ir, G: ig, B: ib, A: ia}
-}
-
-func VecToColor(v Vec3) color.RGBA {
-	return Vec3ToColor(v.x, v.y, v.z, 1)
 }
