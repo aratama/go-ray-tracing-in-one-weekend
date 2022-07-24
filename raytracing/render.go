@@ -12,6 +12,7 @@ import (
 )
 
 const samplesPerPixel = 100
+const maxDepth = 50
 
 const aspectRatio = 16.0 / 9.0
 const imageWidth = 384
@@ -26,10 +27,15 @@ var horizontal = vec3(viewportWidth, 0, 0)
 var vertical = vec3(0, viewportHeight, 0)
 var lowerLeftCorner = sub(sub((origin.sub(horizontal.mul(0.5))), vertical.mul(0.5)), vec3(0, 0, focalLength))
 
-func rayColor(ray Ray, world Hittable) Color {
+func rayColor(ray Ray, world Hittable, depth int) Color {
+	if depth <= 0 {
+		return vec3(0, 0, 0)
+	}
+
 	rec := HitRecord{}
-	if world.hit(ray, 0, math.Inf(1), &rec) {
-		return mul(add(rec.normal, vec3(1, 1, 1)), 0.5)
+	if world.hit(ray, 0.001, math.Inf(1), &rec) {
+		target := add(add(rec.p, rec.normal), randomInUnitSphere())
+		return mul(rayColor(Ray{origin: rec.p, direction: sub(target, rec.p)}, world, depth-1), 0.5)
 	}
 	unitDirection := unit(ray.direction)
 	t := 0.5 * (unitDirection.y + 1.0)
@@ -49,7 +55,7 @@ func pathTrace(world HittableList, i int, j int, ch chan Pixel, waitGroup *sync.
 	for s := 0; s < samplesPerPixel; s++ {
 		u := (float64(i) + rand.Float64()) / (imageWidth - 1)
 		v := (float64(j) + rand.Float64()) / (imageHeight - 1)
-		pixelColor = add(pixelColor, rayColor(cam.getRay(u, v), &world))
+		pixelColor = add(pixelColor, rayColor(cam.getRay(u, v), &world, 50))
 	}
 
 	ch <- Pixel{x: i, y: j, color: pixelColor}
@@ -84,9 +90,11 @@ func Render() {
 			px := <-ch
 
 			scale := 1.0 / float64(samplesPerPixel)
-			px.color.x *= scale
-			px.color.y *= scale
-			px.color.z *= scale
+
+			// with gumma correction (gumma = 2.0)
+			px.color.x = math.Sqrt(px.color.x * scale)
+			px.color.y = math.Sqrt(px.color.y * scale)
+			px.color.z = math.Sqrt(px.color.z * scale)
 			img.SetRGBA(px.x, imageHeight-1-px.y, vecColorToRGBA(px.color))
 		}
 	}

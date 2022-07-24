@@ -35,3 +35,13 @@ func (sphere *Sphere) hit(ray Ray, tMin float64, tMax float64, rec *HitRecord) b
 	return false
 
 }
+
+func randomInUnitSphere() Vec3 {
+	for {
+		p := randomVec3MinMax(-1, 1)
+		if p.length() >= 1.0 {
+			continue
+		}
+		return p
+	}
+}
