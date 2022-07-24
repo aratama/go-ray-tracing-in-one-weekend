@@ -5,6 +5,7 @@ import (
 	"image"
 	"image/png"
 	"os"
+	"sync"
 	"time"
 )
 
@@ -39,28 +40,56 @@ func hitSPhoere(center Point, radius float64, ray Ray) bool {
 	return discriminant > 0
 }
 
-func Render() {
+type Pixel struct {
+	x     int
+	y     int
+	color Color
+}
+
+func PathTrace(i int, j int, ch chan Pixel, waitGroup *sync.WaitGroup) {
+	defer waitGroup.Done()
 
 	var origin = vec3(0, 0, 0)
 	var horizontal = vec3(viewportWidth, 0, 0)
 	var vertical = vec3(0, viewportHeight, 0)
 	var lowerLeftCorner = subVec3(subVec3((origin.sub(horizontal.mul(0.5))), vertical.mul(0.5)), vec3(0, 0, focalLength))
 
+	u := float64(i) / (imageWidth - 1)
+	v := float64(j) / (imageHeight - 1)
+	direction := subVec3(addVec3(addVec3(lowerLeftCorner, horizontal.mul(u)), vertical.mul(v)), origin)
+	r := Ray{origin: origin, direction: direction}
+
+	ch <- Pixel{x: i, y: j, color: rayColor(r)}
+}
+
+func Render() {
+
 	img := image.NewRGBA(image.Rect(0, 0, imageWidth, imageHeight))
 
 	start := time.Now()
 
+	ch := make(chan Pixel, imageWidth*imageHeight)
+
+	var waitGroup sync.WaitGroup
+
 	for j := 0; j < imageHeight; j++ {
 		for i := 0; i < imageWidth; i++ {
-			u := float64(i) / (imageWidth - 1)
-			v := float64(j) / (imageHeight - 1)
-			direction := subVec3(addVec3(addVec3(lowerLeftCorner, horizontal.mul(u)), vertical.mul(v)), origin)
-			r := Ray{origin: origin, direction: direction}
-			img.SetRGBA(i, imageHeight-1-j, VecToColor(rayColor(r)))
+			waitGroup.Add(1)
+			go PathTrace(i, j, ch, &waitGroup)
 		}
 	}
 
-	fmt.Printf("rendering time: %s\n", time.Now().Sub(start).String())
+	waitGroup.Wait()
+
+	for j := 0; j < imageHeight; j++ {
+		for i := 0; i < imageWidth; i++ {
+			px := <-ch
+			img.SetRGBA(px.x, imageHeight-1-px.y, VecToColor(px.color))
+		}
+	}
+
+	fmt.Printf("rendering time: %s\n", time.Now().
+		Sub(start).String())
 
 	encodeStart := time.Now()
 
