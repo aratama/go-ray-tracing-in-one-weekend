@@ -85,12 +85,16 @@ func lerp(u Vec3, v Vec3, t float64) Vec3 {
 	return add(mul(u, 1-t), mul(v, t))
 }
 
-func randomVec3() Vec3 {
-	return vec3(rand.Float64(), rand.Float64(), rand.Float64())
+func randomVec3(random *rand.Rand) Vec3 {
+	return vec3(random.Float64(), random.Float64(), random.Float64())
 }
 
-func randomVec3MinMax(min float64, max float64) Vec3 {
-	return vec3(random(min, max), random(min, max), random(min, max))
+func randomVec3MinMax(min float64, max float64, random *rand.Rand) Vec3 {
+	return vec3(
+		randomMinMax(min, max, random),
+		randomMinMax(min, max, random),
+		randomMinMax(min, max, random),
+	)
 }
 
 func reflect(v Vec3, n Vec3) Vec3 {

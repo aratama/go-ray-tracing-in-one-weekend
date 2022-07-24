@@ -1,6 +1,9 @@
 package raytracing
 
-import "math"
+import (
+	"math"
+	"math/rand"
+)
 
 type Sphere struct {
 	center   Vec3
@@ -39,9 +42,9 @@ func (sphere *Sphere) hit(ray Ray, tMin float64, tMax float64, rec *HitRecord) b
 
 }
 
-func randomInUnitSphere() Vec3 {
+func randomInUnitSphere(random *rand.Rand) Vec3 {
 	for {
-		p := randomVec3MinMax(-1, 1)
+		p := randomVec3MinMax(-1, 1, random)
 		if p.length() >= 1.0 {
 			continue
 		}
@@ -49,9 +52,9 @@ func randomInUnitSphere() Vec3 {
 	}
 }
 
-func randomUnitVector() Vec3 {
-	a := random(0, 2.0*math.Pi)
-	z := random(-1, 1)
+func randomUnitVector(random *rand.Rand) Vec3 {
+	a := randomMinMax(0, 2.0*math.Pi, random)
+	z := randomMinMax(-1, 1, random)
 	r := math.Sqrt(1.0 - z*z)
 	return vec3(r*math.Cos(a), r*math.Sin(a), z)
 }

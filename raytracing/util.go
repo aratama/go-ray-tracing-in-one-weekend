@@ -12,6 +12,6 @@ func clamp(x float64, min float64, max float64) float64 {
 	return x
 }
 
-func random(min float64, max float64) float64 {
-	return min + (max-min)*rand.Float64()
+func randomMinMax(min float64, max float64, random *rand.Rand) float64 {
+	return min + (max-min)*random.Float64()
 }

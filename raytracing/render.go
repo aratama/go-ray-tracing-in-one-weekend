@@ -27,7 +27,7 @@ var horizontal = vec3(viewportWidth, 0, 0)
 var vertical = vec3(0, viewportHeight, 0)
 var lowerLeftCorner = sub(sub((origin.sub(horizontal.mul(0.5))), vertical.mul(0.5)), vec3(0, 0, focalLength))
 
-func rayColor(ray Ray, world Hittable, depth int) Color {
+func rayColor(ray Ray, world Hittable, depth int, random *rand.Rand) Color {
 	rec := HitRecord{}
 
 	if depth <= 0 {
@@ -38,12 +38,12 @@ func rayColor(ray Ray, world Hittable, depth int) Color {
 
 		var scattered Ray
 		var attenuation Color
-		if rec.material.scatter(&ray, &rec, &attenuation, &scattered) {
-			return hadamard(attenuation, rayColor(scattered, world, depth-1))
+		if rec.material.scatter(&ray, &rec, &attenuation, &scattered, random) {
+			return hadamard(attenuation, rayColor(scattered, world, depth-1, random))
 		}
 
-		target := add(add(rec.p, rec.normal), randomUnitVector())
-		return mul(rayColor(Ray{origin: rec.p, direction: sub(target, rec.p)}, world, depth-1), 0.5)
+		target := add(add(rec.p, rec.normal), randomUnitVector(random))
+		return mul(rayColor(Ray{origin: rec.p, direction: sub(target, rec.p)}, world, depth-1, random), 0.5)
 	}
 	unitDirection := unit(ray.direction)
 	t := 0.5 * (unitDirection.y + 1.0)
@@ -60,11 +60,11 @@ func pathTrace(world HittableList, i int, j int, ch chan Pixel, waitGroup *sync.
 	defer waitGroup.Done()
 	cam := camera()
 	var pixelColor Vec3
-	rand.Seed(0)
+	random := rand.New(rand.NewSource(0))
 	for s := 0; s < samplesPerPixel; s++ {
-		u := (float64(i) + rand.Float64()) / (imageWidth - 1)
-		v := (float64(j) + rand.Float64()) / (imageHeight - 1)
-		pixelColor = add(pixelColor, rayColor(cam.getRay(u, v), &world, 50))
+		u := (float64(i) + random.Float64()) / (imageWidth - 1)
+		v := (float64(j) + random.Float64()) / (imageHeight - 1)
+		pixelColor = add(pixelColor, rayColor(cam.getRay(u, v), &world, 50, random))
 	}
 
 	ch <- Pixel{x: i, y: j, color: pixelColor}
